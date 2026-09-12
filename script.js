@@ -205,14 +205,27 @@
     var x = b.offsetX + p * b.usableW;
     var midY = h / 2;
     var amp = Math.min(h * 0.34, 90);
-    var y = midY + Math.sin(p * Math.PI * 2.6) * amp;
+    // fewer wiggles on narrow screens so 14 dots don't bunch up at each curve peak
+    var freq = b.usableW < 420 ? 1.3 : 2.6;
+    var y = midY + Math.sin(p * Math.PI * freq) * amp;
     return { x: x, y: y };
   }
 
   // inverse of pathPoint's x mapping — turns a touch/click x back into progress
   function progressFromX(x) {
     var b = pathBounds();
-    return Math.max(0, Math.min(1, (x - b.offsetX) / b.usableW));
+    var p = Math.max(0, Math.min(1, (x - b.offsetX) / b.usableW));
+    // snap to the nearest milestone when the touch lands reasonably close to
+    // one — makes tapping near a crowded dot land exactly on it instead of
+    // requiring pixel-perfect precision
+    var snapRadius = (1 / milestones.length) * 0.6;
+    var nearest = null, nearestDist = Infinity;
+    milestones.forEach(function (m) {
+      var d = Math.abs(m.t - p);
+      if (d < nearestDist) { nearestDist = d; nearest = m; }
+    });
+    if (nearest && nearestDist < snapRadius) return nearest.t;
+    return p;
   }
 
   function render() {
