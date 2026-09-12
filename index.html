@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 
@@ -34,7 +34,7 @@
     <span class="wordmark">Vanshi Dalal</span>
     <span class="nav-links">
       <a class="nav-link" href="Vanshi_Dalal_Resume.pdf" target="_blank" rel="noopener">resume</a>
-      <a class="nav-link" href="mailto:vanshid1904@gmail.com">vanshid1904@gmail.com</a>
+      <a class="nav-link" href="blog.html">blog</a>
     </span>
   </nav>
 
@@ -43,16 +43,27 @@
     <p class="sub">Five years across e-commerce, enterprise SaaS and security infrastructure — three of them writing production code before moving into product. Currently shipping LLM search into a legacy membership platform, at Nexplay Secure.</p>
   </div>
 
-  <div class="stage" id="stage" aria-label="Drag or click a fragment to read more"></div>
+  <div class="replay-stage" id="replay-stage" aria-label="Drag the scrubber below to move through her career">
+    <div class="replay-cursor" id="replay-cursor" aria-hidden="true">
+      <svg viewBox="0 0 20 20" fill="none">
+        <path d="M13.4 2.6l4 4-9 9-4.6 1 1-4.6z" fill="#D97A44" stroke="#0A0A11" stroke-width="1" stroke-linejoin="round"/>
+        <path d="M11.9 4.1l4 4" stroke="#0A0A11" stroke-width="1"/>
+      </svg>
+    </div>
+    <div class="replay-card" id="replay-card">
+      <span class="replay-card-tag" id="replay-card-tag"></span>
+      <span id="replay-card-text"></span>
+    </div>
+  </div>
 
-  <div class="console" id="console">
+  <div class="console">
     <span class="console-prompt">&gt;</span>
-    <span id="console-text">click a fragment to see what it does</span>
+    <span>touch a point above to explore</span>
     <span class="cursor">▍</span>
   </div>
 
 </header>
 
-<script src="script.js"></script>
+<script src="script.js?v=8"></script>
 </body>
 </html>

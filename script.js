@@ -141,217 +141,173 @@
 })();
 
 // ============================================================
-// fragments: physics playground + click-to-reveal console
+// session replay: her career as a scrubbable recording
 // ============================================================
 (function () {
-  var stage = document.getElementById('stage');
-  var consoleText = document.getElementById('console-text');
+  var stage = document.getElementById('replay-stage');
   if (!stage) return;
+
+  var cursorEl = document.getElementById('replay-cursor');
+  var cardEl = document.getElementById('replay-card');
+  var cardTagEl = document.getElementById('replay-card-tag');
+  var cardTextEl = document.getElementById('replay-card-text');
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  var fragments = [
-    { label: 'concierge test', detail: 'Ran a concierge test on eligibility rules before engineering scoped a rules engine — the manual path resolved faster than the build would have taken. The build never got scoped.' },
-    { label: 'confidence floor', detail: 'LLM search across membership content returns ranked source links instead of a generated answer below a set confidence threshold. A wrong answer about eligibility costs more than no answer.' },
-    { label: 'migration, risk-first', detail: 'Resequenced a legacy system migration around what breaks a member\u2019s day first — registration and renewals moved before reporting and admin tooling.' },
-    { label: 'checkout completions', detail: 'Owned the hypothesis and instrumentation behind guest checkout, autofill and address-validation A/B tests. Measured on completed checkouts, not click-through.' },
-    { label: 'technical pm', detail: 'Three years as a software engineer before product — she owns the parts most PMs hand off: API contracts, data models, retrieval quality, cutover sequencing.' },
-    { label: 'ai / llm products', detail: 'Ships AI features end to end: retrieval design, eval sets, hallucination guardrails and confidence fallbacks, with cost and latency trade-offs weighed in from day one.' },
-    { label: 'cross-functional', detail: 'Works at the contract level with engineering on integrations — request and response shape, auth flows, error semantics, idempotency on retries — before they become bug tickets.' },
-    { label: 'rag + retrieval', detail: 'Chunking strategy, metadata filtering, eval sets and regression suites, hallucination guardrails, confidence fallbacks, cost and latency trade-offs.' },
-    { label: 'rice / moscow', detail: 'Prioritization frameworks used alongside JTBD switch interviews \u2014 RICE and MoSCoW for what to build, switch interviews for why someone actually moved.' },
-    { label: 'sub-1% failures', detail: 'Integrated Apple Pay, Razorpay and Stripe at sub-1% transaction failure targets, backed by alerting tuned ahead of global sale events.' },
-    { label: 'iit patna, mba', detail: 'MBA in International Business and Finance, IIT Patna, 2022\u20132027, focused on generative AI and business strategy.' },
-    { label: 'ga4 + amplitude', detail: 'Product analytics stack: GA4, Amplitude, Metabase, Power BI, SQL, funnel and cohort analysis, HEART.' },
-    { label: 'python / flask', detail: 'Hands-on: Python, Flask, Django, JavaScript, MongoDB, GCP, TensorFlow, REST API design \u2014 three years of production code before product.' },
-    { label: 'iot gps tracker', detail: 'Built an IoT GPS tracking system on Raspberry Pi during her M.Sc., adopted by three schools at 95% location accuracy.' }
+  // real content, reused as-is — spaced across the timeline in order
+  var milestones = [
+    { tag: 'role', label: 'technical pm', detail: 'Spent three years as a software engineer before moving into product — I still own the parts most PMs hand off: API contracts, data models, retrieval quality, cutover sequencing.' },
+    { tag: 'project', label: 'iot gps tracker', detail: 'Built an IoT GPS tracking system on Raspberry Pi during my M.Sc., adopted by three schools at 95% location accuracy.' },
+    { tag: 'tools', label: 'python / flask', detail: 'Hands-on with Python, Flask, Django, JavaScript, MongoDB, GCP, TensorFlow, REST API design — three years writing production code before product.' },
+    { tag: 'education', label: 'iit patna, mba', detail: 'Pursued an MBA in International Business and Finance at IIT Patna, 2022–2027, focused on generative AI and business strategy.' },
+    { tag: 'practice', label: 'concierge test', detail: 'Ran a concierge test on eligibility rules before engineering scoped a rules engine — the manual path resolved faster than the build would have taken. I never let the build get scoped.' },
+    { tag: 'framework', label: 'rice / moscow', detail: 'Use RICE and MoSCoW for what to build, alongside JTBD switch interviews for why someone actually moved.' },
+    { tag: 'shipped', label: 'checkout completions', detail: 'Owned the hypothesis and instrumentation behind guest checkout, autofill and address-validation A/B tests. Measured on completed checkouts, not click-through.' },
+    { tag: 'shipped', label: 'sub-1% failures', detail: 'Integrated Apple Pay, Razorpay and Stripe at sub-1% transaction failure targets, backed by alerting I tuned ahead of global sale events.' },
+    { tag: 'tools', label: 'ga4 + amplitude', detail: 'Built my product analytics stack around GA4, Amplitude, Metabase, Power BI and SQL — funnel and cohort analysis, HEART.' },
+    { tag: 'practice', label: 'cross-functional', detail: 'Worked at the contract level with engineering on integrations — request and response shape, auth flows, error semantics, idempotency on retries — before they became bug tickets.' },
+    { tag: 'shipped', label: 'migration, risk-first', detail: 'Resequenced a legacy system migration around what breaks a member’s day first — moved registration and renewals ahead of reporting and admin tooling.' },
+    { tag: 'skill', label: 'rag + retrieval', detail: 'Designed chunking strategy, metadata filtering, eval sets and regression suites — hallucination guardrails, confidence fallbacks, cost and latency trade-offs.' },
+    { tag: 'shipped', label: 'confidence floor', detail: 'Shipped LLM search across membership content that returns ranked source links instead of a generated answer below a set confidence threshold. A wrong answer about eligibility costs more than no answer.' },
+    { tag: 'focus', label: 'ai / llm products', detail: 'Ship AI features end to end: retrieval design, eval sets, hallucination guardrails and confidence fallbacks, weighing cost and latency trade-offs from day one.' }
   ];
-  var classes = ['chip-1', 'chip-2', 'chip-3', 'chip-4', 'chip-5', 'chip-6'];
 
-  var style = document.createElement('style');
-  style.textContent = classes.map(function (c, i) {
-    var n = i + 1;
-    return '.' + c + '{ background: var(--chip-' + n + '-bg); color: var(--chip-' + n + '-fg); }';
-  }).join('\n');
-  document.head.appendChild(style);
+  // spread evenly with a touch of padding at each end
+  milestones.forEach(function (m, i) {
+    m.t = (i + 0.5) / milestones.length;
+  });
 
-  var chips = [];
-  var W = stage.clientWidth;
-  var H = stage.clientHeight;
-  var GAP = 16; // minimum breathing room between fragments on placement
-
-  // Find a spot that doesn't overlap any fragment already placed. Falls
-  // back to a fully random spot if the stage is too crowded to fit cleanly.
-  function findOpenSpot(w, h) {
-    var maxX = Math.max(W - w, 8);
-    var maxY = Math.max(H - h, 8);
-    for (var attempt = 0; attempt < 80; attempt++) {
-      var x = Math.random() * maxX;
-      var y = Math.random() * maxY;
-      var clear = true;
-      for (var i = 0; i < chips.length; i++) {
-        var c = chips[i];
-        var cw = c.el.offsetWidth, ch = c.el.offsetHeight;
-        if (x < c.x + cw + GAP && x + w + GAP > c.x &&
-            y < c.y + ch + GAP && y + h + GAP > c.y) {
-          clear = false;
-          break;
-        }
-      }
-      if (clear) return { x: x, y: y };
-    }
-    return { x: Math.random() * maxX, y: Math.random() * maxY };
-  }
-
-  fragments.forEach(function (frag, i) {
+  var nodeEls = milestones.map(function () {
     var el = document.createElement('div');
-    el.className = 'frag ' + classes[i % classes.length];
-    el.textContent = frag.label;
-    el.tabIndex = 0;
-    el.setAttribute('role', 'button');
-    el.setAttribute('aria-label', 'Expand: ' + frag.label);
+    el.className = 'replay-node';
     stage.appendChild(el);
-
-    var w = el.offsetWidth, h = el.offsetHeight;
-    var spot = findOpenSpot(w, h);
-    var angle = Math.random() * Math.PI * 2;
-    var speed = 0.1 + Math.random() * 0.12;
-    chips.push({
-      el: el, x: spot.x, y: spot.y, w: w, h: h, detail: frag.detail,
-      // constant slow drift, like debris floating in space — this never decays to zero
-      baseVx: Math.cos(angle) * speed,
-      baseVy: Math.sin(angle) * speed,
-      speed: speed,
-      // temporary nudge from cursor proximity/drag throw, decays back to nothing
-      jitterVx: 0, jitterVy: 0,
-      headingTimer: 90 + Math.floor(Math.random() * 150)
-    });
+    return el;
   });
 
-  function activate(chip) {
-    chips.forEach(function (c) { c.el.classList.remove('is-active'); });
-    chip.el.classList.add('is-active');
-    if (consoleText) consoleText.textContent = chip.detail;
+  var DURATION = 12000; // ms for a full pass, before per-node slow-down
+  var progress = 0.01;
+  var direction = 1; // ping-pongs between 0 and 1 — never jump-cuts back to the start
+  var dragging = false;
+  var last = null;
+
+  function pathBounds() {
+    var w = stage.clientWidth;
+    var pad = 36;
+    // cap the usable width so the wave doesn't stretch flat and sparse on very wide screens
+    var usableW = Math.min(w - pad * 2, 920);
+    var offsetX = pad + Math.max(w - pad * 2 - usableW, 0) / 2;
+    return { offsetX: offsetX, usableW: Math.max(usableW, 10) };
   }
 
-  chips.forEach(function (c) {
-    c.el.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(c); }
+  function pathPoint(p) {
+    var b = pathBounds();
+    var h = stage.clientHeight;
+    var x = b.offsetX + p * b.usableW;
+    var midY = h / 2;
+    var amp = Math.min(h * 0.34, 90);
+    var y = midY + Math.sin(p * Math.PI * 2.6) * amp;
+    return { x: x, y: y };
+  }
+
+  // inverse of pathPoint's x mapping — turns a touch/click x back into progress
+  function progressFromX(x) {
+    var b = pathBounds();
+    return Math.max(0, Math.min(1, (x - b.offsetX) / b.usableW));
+  }
+
+  function render() {
+    var pos = pathPoint(progress);
+    cursorEl.style.left = (pos.x - 3) + 'px';
+    cursorEl.style.top = (pos.y - 14) + 'px';
+
+    var nearest = null, nearestDist = 999;
+    milestones.forEach(function (m, i) {
+      var d = Math.abs(m.t - progress);
+      if (d < nearestDist) { nearestDist = d; nearest = m; }
+      var pt = pathPoint(m.t);
+      nodeEls[i].style.left = pt.x + 'px';
+      nodeEls[i].style.top = pt.y + 'px';
+      nodeEls[i].classList.toggle('active', d < 0.018);
     });
-  });
 
-  if (reduceMotion) {
-    chips.forEach(function (c) {
-      c.el.style.transform = 'translate(' + c.x + 'px,' + c.y + 'px)';
-      c.el.addEventListener('click', function () { activate(c); });
-    });
-    return;
-  }
+    var showCard = nearestDist < 0.03;
+    if (showCard && nearest) {
+      var cpt = pathPoint(nearest.t);
+      cardTagEl.textContent = nearest.tag + ' — ' + nearest.label;
+      cardTextEl.textContent = nearest.detail;
+      cardEl.classList.add('show');
 
-  var mouse = { x: -9999, y: -9999 };
-  var dragTarget = null;
-  var downPos = null;
-  var moved = false;
+      // clamp against the card's real measured size so long detail text
+      // never overflows the stage, on any screen width
+      var stageW = stage.clientWidth, stageH = stage.clientHeight;
+      var cw = cardEl.offsetWidth, ch = cardEl.offsetHeight;
+      var pad = 10;
+      var cx = Math.min(stageW - cw / 2 - pad, Math.max(cw / 2 + pad, cpt.x));
 
-  function localPos(e) {
-    var r = stage.getBoundingClientRect();
-    var cx = (e.touches ? e.touches[0].clientX : e.clientX);
-    var cy = (e.touches ? e.touches[0].clientY : e.clientY);
-    return { x: cx - r.left, y: cy - r.top };
-  }
+      var below = cpt.y + 26;
+      var above = cpt.y - ch - 26;
+      var cy;
+      if (above >= pad) {
+        cy = above;
+      } else if (below + ch <= stageH - pad) {
+        cy = below;
+      } else {
+        // neither side clears the stage cleanly (short stage / long text) — pin inside bounds
+        cy = Math.min(Math.max(cpt.y - ch / 2, pad), stageH - ch - pad);
+      }
 
-  stage.addEventListener('mousemove', function (e) {
-    var p = localPos(e);
-    mouse.x = p.x; mouse.y = p.y;
-    if (dragTarget) {
-      dragTarget.x = p.x; dragTarget.y = p.y;
-      if (downPos && (Math.abs(p.x - downPos.x) > 4 || Math.abs(p.y - downPos.y) > 4)) moved = true;
+      cardEl.style.left = cx + 'px';
+      cardEl.style.top = cy + 'px';
+    } else {
+      cardEl.classList.remove('show');
     }
-  });
-  stage.addEventListener('mouseleave', function () { mouse.x = -9999; mouse.y = -9999; });
+  }
 
-  chips.forEach(function (c) {
-    c.el.addEventListener('mousedown', function (e) {
-      dragTarget = c; moved = false; downPos = localPos(e); c.jitterVx = 0; c.jitterVy = 0; e.preventDefault();
-    });
-    c.el.addEventListener('mouseup', function () {
-      if (!moved) activate(c);
-    });
-    c.el.addEventListener('touchstart', function (e) {
-      dragTarget = c; moved = false; downPos = localPos(e); c.jitterVx = 0; c.jitterVy = 0;
-    }, { passive: true });
-    c.el.addEventListener('touchend', function () {
-      if (!moved) activate(c);
-    });
-  });
-  window.addEventListener('mouseup', function () { dragTarget = null; });
-  window.addEventListener('touchend', function () { dragTarget = null; });
-  window.addEventListener('touchmove', function (e) {
-    if (dragTarget) {
-      var p = localPos(e);
-      dragTarget.x = p.x; dragTarget.y = p.y;
-      if (downPos && (Math.abs(p.x - downPos.x) > 4 || Math.abs(p.y - downPos.y) > 4)) moved = true;
+  function loop(now) {
+    requestAnimationFrame(loop);
+    if (last === null) last = now;
+    var dt = now - last;
+    last = now;
+    if (!dragging) {
+      // ease speed down near each node and back up leaving it — a smooth
+      // ramp, not a step, so it never jumps speed abruptly
+      var nearestDist = 999;
+      milestones.forEach(function (m) { nearestDist = Math.min(nearestDist, Math.abs(m.t - progress)); });
+      var falloff = 0.06;
+      var t = Math.min(nearestDist / falloff, 1);
+      var eased = t * t * (3 - 2 * t); // smoothstep
+      var speedMul = 0.12 + eased * 0.88;
+      var next = progress + (dt / DURATION) * speedMul * direction;
+      // ping-pong at the ends instead of snapping back to the start
+      if (next >= 1) { next = 1; direction = -1; }
+      else if (next <= 0) { next = 0; direction = 1; }
+      progress = next;
     }
+    render();
+  }
+
+  function seekFromEvent(e) {
+    var rect = stage.getBoundingClientRect();
+    var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    progress = progressFromX(clientX - rect.left);
+    render();
+  }
+
+  // touching a point on the stage pauses playback and highlights the nearest
+  // dot right there; releasing resumes autoplay onward from that point — it never rewinds
+  stage.addEventListener('mousedown', function (e) {
+    dragging = true; seekFromEvent(e);
+  });
+  stage.addEventListener('touchstart', function (e) {
+    dragging = true; seekFromEvent(e);
   }, { passive: true });
+  window.addEventListener('mousemove', function (e) { if (dragging) seekFromEvent(e); });
+  window.addEventListener('touchmove', function (e) { if (dragging) seekFromEvent(e); }, { passive: true });
+  window.addEventListener('mouseup', function () { dragging = false; });
+  window.addEventListener('touchend', function () { dragging = false; });
 
-  window.addEventListener('resize', function () {
-    W = stage.clientWidth; H = stage.clientHeight;
-    chips.forEach(function (c) { c.w = c.el.offsetWidth; c.h = c.el.offsetHeight; });
-  });
+  window.addEventListener('resize', render);
 
-  function tick() {
-    chips.forEach(function (c) {
-      if (c === dragTarget) {
-        c.el.style.transform = 'translate(' + c.x + 'px,' + c.y + 'px)';
-        return;
-      }
-
-      // gentle cursor-avoidance nudge — only ever fires with a real mouse;
-      // on touch, mouse.x/y sit off-stage so this is a no-op and drift alone carries it
-      var dx = c.x - mouse.x, dy = c.y - mouse.y;
-      var dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 110 && dist > 0.1) {
-        var force = ((110 - dist) / 110) * 0.9;
-        c.jitterVx += (dx / dist) * force;
-        c.jitterVy += (dy / dist) * force;
-      }
-      c.jitterVx *= 0.94;
-      c.jitterVy *= 0.94;
-
-      // every couple of seconds, nudge the heading by a modest turn (not a full
-      // random reversal) so the path curves naturally instead of snapping around
-      c.headingTimer--;
-      if (c.headingTimer <= 0) {
-        var curAngle = Math.atan2(c.baseVy, c.baseVx);
-        var turn = (Math.random() - 0.5) * 2.2; // up to ~±63°
-        var newAngle = curAngle + turn;
-        c.targetVx = Math.cos(newAngle) * c.speed;
-        c.targetVy = Math.sin(newAngle) * c.speed;
-        c.headingTimer = 90 + Math.floor(Math.random() * 150);
-      }
-      if (c.targetVx !== undefined) {
-        c.baseVx += (c.targetVx - c.baseVx) * 0.02;
-        c.baseVy += (c.targetVy - c.baseVy) * 0.02;
-      }
-
-      c.x += c.baseVx + c.jitterVx;
-      c.y += c.baseVy + c.jitterVy;
-
-      // bounce off the stage edges — never teleport or vanish, just turn and keep drifting
-      if (c.x < 0) {
-        c.x = 0; c.baseVx = Math.abs(c.baseVx); c.jitterVx = Math.abs(c.jitterVx); c.targetVx = c.baseVx;
-      } else if (c.x > W - c.w) {
-        c.x = W - c.w; c.baseVx = -Math.abs(c.baseVx); c.jitterVx = -Math.abs(c.jitterVx); c.targetVx = c.baseVx;
-      }
-      if (c.y < 0) {
-        c.y = 0; c.baseVy = Math.abs(c.baseVy); c.jitterVy = Math.abs(c.jitterVy); c.targetVy = c.baseVy;
-      } else if (c.y > H - c.h) {
-        c.y = H - c.h; c.baseVy = -Math.abs(c.baseVy); c.jitterVy = -Math.abs(c.jitterVy); c.targetVy = c.baseVy;
-      }
-
-      c.el.style.transform = 'translate(' + c.x + 'px,' + c.y + 'px)';
-    });
-    requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
+  render();
+  if (!reduceMotion) requestAnimationFrame(loop);
 })();
