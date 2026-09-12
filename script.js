@@ -302,11 +302,8 @@
   });
 
   // treat each fragment as a bounding circle for collision purposes —
-  // simple, cheap, and looks right regardless of each pill's own w/h
-  // deliberately smaller than the true bounding circle — on narrow/mobile
-  // screens 14 fragments can't all fit without overlapping, and a full
-  // half-diagonal radius makes nearly every pair "colliding" at once, which
-  // deadlocks the elastic response into a near-total freeze
+  // deliberately smaller than the true half-diagonal so glancing passes don't
+  // count as contact
   function radiusOf(c) { return (c.w + c.h) / 4.6; }
 
   // atom-style elastic bounce between every pair of fragments, run once per
