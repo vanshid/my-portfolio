@@ -281,14 +281,15 @@ a.footer-note:hover{ color: var(--ink-soft); }
 
 /* horizontal, swipe/scroll carousel — one card at a time, centered, no arrows */
 .blog-carousel{ position: relative; }
+/* plain native horizontal scroller — no touch-action override, so phones
+   handle the swipe themselves (horizontal here, vertical to the page) */
 .blog-grid{
   display: flex;
   align-items: center;
   overflow-x: auto;
-  overflow-y: visible;
+  overflow-y: hidden;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-x; /* claim horizontal swipes so iOS doesn't hand them to the page's vertical scroll */
   width: min(390px, 100%);
   padding: 14px 0 10px;
   scrollbar-width: none;
@@ -300,13 +301,13 @@ a.footer-note:hover{ color: var(--ink-soft); }
   flex: 0 0 100%;
   width: 100%;
   scroll-snap-align: center;
-  scroll-snap-stop: always;
   text-decoration: none;
   color: inherit;
-  /* opacity/scale/shadow are driven per-frame by JS as you scroll — this is just the resting state */
+  /* only opacity is animated while scrolling — transform on a snap target
+     shifts its own snap position and fights the browser's snap engine, and
+     a per-frame blur is far too heavy for a phone */
   opacity: 1;
-  transform: scale(1);
-  will-change: transform, opacity, filter;
+  will-change: opacity;
 }
 .blog-card .blog-thumb{
   transition: box-shadow 0.2s ease;
@@ -369,10 +370,20 @@ a.footer-note:hover{ color: var(--ink-soft); }
   .blog-hero{ margin-top: 36px; }
   .blog-section{ margin-top: 44px; }
 
-  /* more compact cards on phones — a 16:10 cover eats a third of the screen */
-  .blog-thumb{ aspect-ratio: 2 / 1; border-radius: 12px; margin-bottom: 14px; }
-  .blog-card-title{ font-size: 15.5px; line-height: 1.3; }
-  .blog-card-excerpt{ font-size: 13px; margin-top: 8px; }
-  .blog-card-meta{ font-size: 10px; margin-top: 10px; }
-  .blog-grid{ padding: 10px 0 6px; }
+  /* more compact cards on phones, and narrower than the scrollport so the
+     next card peeks in at the edge — that's what makes it read as a swipeable
+     carousel instead of a single stacked card */
+  .blog-grid{ padding: 10px 0 6px; gap: 12px; scroll-padding-left: 0; }
+  .blog-card{ flex: 0 0 82%; width: 82%; }
+  .blog-thumb{ aspect-ratio: 2 / 1; border-radius: 12px; margin-bottom: 12px; }
+  .blog-card-title{
+    font-size: 14.5px;
+    line-height: 1.3;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .blog-card-excerpt{ font-size: 12.5px; margin-top: 7px; }
+  .blog-card-meta{ font-size: 10px; margin-top: 9px; }
 }

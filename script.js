@@ -224,6 +224,13 @@
       baseVx: Math.cos(angle) * speed,
       baseVy: Math.sin(angle) * speed,
       speed: speed,
+      // seeded up front so they're never undefined: an edge bounce sets only
+      // the axis it bounced on, and the lerp below reads both. If targetVy
+      // were still undefined there, (undefined - baseVy) is NaN — which then
+      // spreads to every other fragment through the collision pass and
+      // freezes the whole stage.
+      targetVx: Math.cos(angle) * speed,
+      targetVy: Math.sin(angle) * speed,
       // temporary nudge from cursor proximity/drag throw, decays back to nothing
       jitterVx: 0, jitterVy: 0,
       headingTimer: 90 + Math.floor(Math.random() * 150)
@@ -254,6 +261,7 @@
   var dragTarget = null;
   var downPos = null;
   var moved = false;
+  var lastDragMove = 0;
 
   function localPos(e) {
     var r = stage.getBoundingClientRect();
@@ -267,31 +275,57 @@
     mouse.x = p.x; mouse.y = p.y;
     if (dragTarget) {
       dragTarget.x = p.x; dragTarget.y = p.y;
+      lastDragMove = Date.now();
       if (downPos && (Math.abs(p.x - downPos.x) > 4 || Math.abs(p.y - downPos.y) > 4)) moved = true;
     }
   });
   stage.addEventListener('mouseleave', function () { mouse.x = -9999; mouse.y = -9999; });
 
+  // release whatever is being dragged and forget the cursor. Touch devices
+  // fire synthetic mouse events after a tap but never fire mouseleave, so
+  // without the reset the last tap point stays as a permanent repulsion
+  // source shoving nearby fragments around.
+  function endDrag() {
+    dragTarget = null;
+    downPos = null;
+    mouse.x = -9999; mouse.y = -9999;
+  }
+
   chips.forEach(function (c) {
     c.el.addEventListener('mousedown', function (e) {
-      dragTarget = c; moved = false; downPos = localPos(e); c.jitterVx = 0; c.jitterVy = 0; e.preventDefault();
+      dragTarget = c; moved = false; downPos = localPos(e); lastDragMove = Date.now();
+      c.jitterVx = 0; c.jitterVy = 0; e.preventDefault();
     });
     c.el.addEventListener('mouseup', function () {
       if (!moved) activate(c);
     });
     c.el.addEventListener('touchstart', function (e) {
-      dragTarget = c; moved = false; downPos = localPos(e); c.jitterVx = 0; c.jitterVy = 0;
+      dragTarget = c; moved = false; downPos = localPos(e); lastDragMove = Date.now();
+      c.jitterVx = 0; c.jitterVy = 0;
     }, { passive: true });
     c.el.addEventListener('touchend', function () {
       if (!moved) activate(c);
     });
   });
-  window.addEventListener('mouseup', function () { dragTarget = null; });
-  window.addEventListener('touchend', function () { dragTarget = null; });
+
+  window.addEventListener('mouseup', endDrag);
+  window.addEventListener('touchend', endDrag);
+  // touchcancel is the one that actually bites: the browser fires it instead
+  // of touchend whenever it takes the gesture over (page scroll, edge swipe,
+  // an incoming notification), and without this the fragment stays pinned as
+  // the drag target and never moves again.
+  window.addEventListener('touchcancel', endDrag);
+  window.addEventListener('pointercancel', endDrag);
+  window.addEventListener('blur', endDrag);
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) endDrag();
+  });
+
   window.addEventListener('touchmove', function (e) {
     if (dragTarget) {
       var p = localPos(e);
       dragTarget.x = p.x; dragTarget.y = p.y;
+      lastDragMove = Date.now();
       if (downPos && (Math.abs(p.x - downPos.x) > 4 || Math.abs(p.y - downPos.y) > 4)) moved = true;
     }
   }, { passive: true });
@@ -377,6 +411,11 @@
   }
 
   function tick() {
+    // watchdog: if something is still flagged as being dragged but hasn't
+    // moved in a second, the release event went missing — let it go, so a
+    // fragment can never end up frozen for the rest of the session
+    if (dragTarget && Date.now() - lastDragMove > 1000) endDrag();
+
     chips.forEach(function (c) {
       if (c === dragTarget) {
         return;
@@ -405,7 +444,7 @@
         c.targetVy = Math.sin(newAngle) * c.speed;
         c.headingTimer = 90 + Math.floor(Math.random() * 150);
       }
-      if (c.targetVx !== undefined) {
+      if (c.targetVx !== undefined && c.targetVy !== undefined) {
         c.baseVx += (c.targetVx - c.baseVx) * 0.02;
         c.baseVy += (c.targetVy - c.baseVy) * 0.02;
       }
@@ -466,6 +505,7 @@
     var cards = Array.prototype.slice.call(grid.querySelectorAll('.blog-card'));
     var ticking = false;
     var wrapTimer = null;
+    var touching = false;
 
     function update() {
       ticking = false;
@@ -477,41 +517,79 @@
         var cardCenter = r.left + r.width / 2;
         var d = Math.abs(cardCenter - centerX);
         var dist = Math.min(d / gridRect.width, 1); // 0 at rest, 1 one card-width away
-        // smoothstep easing — a Netflix-style ease rather than a linear fade,
-        // so the crossfade accelerates through the middle and settles softly at both ends
+        // smoothstep easing so the crossfade accelerates through the middle
+        // and settles softly at both ends
         var eased = dist * dist * (3 - 2 * dist);
         card.style.opacity = (1 - eased * 0.82).toFixed(3);
-        var scale = 1 - eased * 0.14;
-        card.style.transform = 'scale(' + scale.toFixed(3) + ')';
-        card.style.filter = eased > 0.02 ? 'blur(' + (eased * 2.5).toFixed(2) + 'px)' : 'none';
         if (d < closestDist) { closestDist = d; closestI = i; }
       });
       return closestI;
     }
 
-    function jumpTo(index) {
-      grid.scrollLeft = index * grid.clientWidth;
+    // scrollLeft that centres a given card — derived from real geometry, so
+    // it stays correct whatever the card width/gap is at this breakpoint
+    function scrollTargetFor(index) {
+      var gridRect = grid.getBoundingClientRect();
+      var cardRect = cards[index].getBoundingClientRect();
+      return grid.scrollLeft + (cardRect.left - gridRect.left) - (gridRect.width - cardRect.width) / 2;
+    }
+
+    // the wrap is the one thing that must never fight the user: only run it
+    // once the finger is off AND the scroll has actually come to rest on a
+    // clone. Jumping scrollLeft mid-gesture yanks the carousel out from under
+    // the swipe, which reads as "the carousel doesn't work".
+    function maybeWrap() {
+      if (!loopable || touching) return;
+      var index = update();
+      if (index !== 0 && index !== cards.length - 1) return;
+      // No centring check here: at either end the scroller clamps, so a
+      // centre-aligned clone can never actually sit dead centre. Getting here
+      // already means the finger is off and no scroll event has fired for
+      // 260ms, i.e. it has come to rest.
+      grid.scrollLeft = scrollTargetFor(index === 0 ? cards.length - 2 : 1);
       update();
     }
 
     grid.addEventListener('scroll', function () {
       if (!ticking) { ticking = true; requestAnimationFrame(update); }
-      if (loopable) {
-        clearTimeout(wrapTimer);
-        wrapTimer = setTimeout(function () {
-          var nearest = update();
-          if (nearest === 0) jumpTo(cards.length - 2); // start clone -> real last
-          else if (nearest === cards.length - 1) jumpTo(1); // end clone -> real first
-        }, 120);
-      }
+      clearTimeout(wrapTimer);
+      wrapTimer = setTimeout(maybeWrap, 260);
     }, { passive: true });
 
-    window.addEventListener('resize', function () {
-      var nearest = update();
-      grid.scrollLeft = nearest * grid.clientWidth;
+    // native scrollend where it exists (Chrome 114+/Safari 17.4+) is exact —
+    // the debounce above is the fallback for older phones
+    if ('onscrollend' in window) {
+      grid.addEventListener('scrollend', function () {
+        clearTimeout(wrapTimer);
+        maybeWrap();
+      });
+    }
+
+    ['touchstart', 'pointerdown'].forEach(function (ev) {
+      grid.addEventListener(ev, function () { touching = true; }, { passive: true });
+    });
+    ['touchend', 'touchcancel', 'pointerup', 'pointercancel'].forEach(function (ev) {
+      window.addEventListener(ev, function () {
+        if (!touching) return;
+        touching = false;
+        clearTimeout(wrapTimer);
+        wrapTimer = setTimeout(maybeWrap, 260);
+      }, { passive: true });
     });
 
-    if (loopable) grid.scrollLeft = 1 * grid.clientWidth; // start on the real first card
-    update();
+    window.addEventListener('resize', function () {
+      var index = update();
+      grid.scrollLeft = scrollTargetFor(index);
+      update();
+    });
+
+    function start() {
+      if (loopable) grid.scrollLeft = scrollTargetFor(1); // the real first card
+      update();
+    }
+    start();
+    // covers get lazy-loaded, so card geometry can still shift after first
+    // paint — re-anchor once everything has actually settled
+    window.addEventListener('load', start);
   });
 })();
