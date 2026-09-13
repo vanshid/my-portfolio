@@ -115,7 +115,7 @@ a{ color: inherit; }
 .stage{
   position: relative;
   flex: 1;
-  min-height: 320px;
+  min-height: 560px;
   margin-top: 18px;
 }
 
@@ -161,10 +161,10 @@ a{ color: inherit; }
   .nav{ flex-wrap: wrap; row-gap: 6px; }
   .nav-links{ flex-wrap: wrap; gap: 12px; }
   .headline{ margin-top: 28px; }
-  /* smaller pills + a taller stage on phones: 14 fragments at desktop size
-     fill a ~350px-wide stage almost completely, so they end up permanently
-     in contact and the collisions cancel all their drift out */
-  .stage{ min-height: 420px; }
+  /* smaller pills + a taller stage on phones: a wide fragment set at desktop
+     size fills a ~350px-wide stage almost completely, so they end up
+     permanently in contact and the collisions cancel all their drift out */
+  .stage{ min-height: 900px; }
   .frag{ font-size: 10.5px; padding: 4px 9px; }
   .mobile-break{ display: inline; }
 }

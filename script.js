@@ -151,20 +151,46 @@
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   var fragments = [
-    { label: 'concierge test', detail: 'Ran a concierge test on eligibility rules before engineering scoped a rules engine — the manual path resolved faster than the build would have taken. The build never got scoped.' },
-    { label: 'confidence floor', detail: 'LLM search across membership content returns ranked source links instead of a generated answer below a set confidence threshold. A wrong answer about eligibility costs more than no answer.' },
-    { label: 'migration, risk-first', detail: 'Resequenced a legacy system migration around what breaks a member\u2019s day first — registration and renewals moved before reporting and admin tooling.' },
-    { label: 'checkout completions', detail: 'Owned the hypothesis and instrumentation behind guest checkout, autofill and address-validation A/B tests. Measured on completed checkouts, not click-through.' },
-    { label: 'technical pm', detail: 'Three years as a software engineer before product — she owns the parts most PMs hand off: API contracts, data models, retrieval quality, cutover sequencing.' },
-    { label: 'ai / llm products', detail: 'Ships AI features end to end: retrieval design, eval sets, hallucination guardrails and confidence fallbacks, with cost and latency trade-offs weighed in from day one.' },
-    { label: 'cross-functional', detail: 'Works at the contract level with engineering on integrations — request and response shape, auth flows, error semantics, idempotency on retries — before they become bug tickets.' },
-    { label: 'rag + retrieval', detail: 'Chunking strategy, metadata filtering, eval sets and regression suites, hallucination guardrails, confidence fallbacks, cost and latency trade-offs.' },
-    { label: 'rice / moscow', detail: 'Prioritization frameworks used alongside JTBD switch interviews \u2014 RICE and MoSCoW for what to build, switch interviews for why someone actually moved.' },
-    { label: 'sub-1% failures', detail: 'Integrated Apple Pay, Razorpay and Stripe at sub-1% transaction failure targets, backed by alerting tuned ahead of global sale events.' },
-    { label: 'iit patna, mba', detail: 'MBA in International Business and Finance, IIT Patna, 2022\u20132027, focused on generative AI and business strategy.' },
-    { label: 'ga4 + amplitude', detail: 'Product analytics stack: GA4, Amplitude, Metabase, Power BI, SQL, funnel and cohort analysis, HEART.' },
-    { label: 'python / flask', detail: 'Hands-on: Python, Flask, Django, JavaScript, MongoDB, GCP, TensorFlow, REST API design \u2014 three years of production code before product.' },
-    { label: 'iot gps tracker', detail: 'Built an IoT GPS tracking system on Raspberry Pi during her M.Sc., adopted by three schools at 95% location accuracy.' }
+    { label: 'technical pm', detail: 'Owns the parts most PMs hand off — API contracts, data models, cutover sequencing — instead of leaving the gaps for engineering to fill in.' },
+    { label: 'agile pm', detail: 'Runs sprint planning, refinement, stand-ups, retros and release trains across distributed teams — the operating rhythm underneath every roadmap.' },
+    { label: 'concierge test', detail: 'A concierge test on eligibility rules killed a rules-engine build that would have taken most of a quarter — the manual path was faster than the build.' },
+    { label: 'discovery as practice', detail: 'Weekly stakeholder calls, an opportunity-solution tree per quarter, assumption tests before engineering commits — discovery run as a standing practice, not a phase that happens before the roadmap.' },
+    { label: 'switch interviews', detail: 'JTBD switch interviews for the question dashboards can’t answer — why someone moved, not just what they clicked.' },
+    { label: 'confidence floor', detail: 'Search across policy and program content returns ranked links, not a generated answer, below a set confidence threshold — a wrong answer costs more than no answer.' },
+    { label: 'golden question set', detail: 'A golden-question regression suite runs against the retrieval layer before every release — chunking strategy and metadata filters included.' },
+    { label: 'risk-first sequencing', detail: 'Resequenced a legacy replatform around what breaks a user’s day first — core flows moved before reporting and admin tooling.' },
+    { label: 'integration contracts', detail: 'Request shape, auth flows, field mappings, error semantics, idempotency on retries — failure modes go into the spec, not into a bug ticket three sprints later.' },
+    { label: 'rice / moscow', detail: 'Prioritizes with RICE and MoSCoW, sequences with WSJF — the framework changes with the room, the discipline doesn’t.' },
+    { label: 'analytics baseline', detail: 'Built a product’s first analytics baseline and a closed customer feedback loop — adoption became a signal, not an afterthought to a shipped roadmap.' },
+    { label: 'sub-1% failures', detail: 'Sub-1% payment failure targets across multiple providers, backed by alerting tuned ahead of peak sale traffic.' },
+    { label: 'checkout completions', detail: 'Owned the hypothesis and instrumentation behind guest checkout, autofill and address-validation tests — measured on completed checkouts, not click-throughs.' },
+    { label: 'personalization holdout', detail: 'Partnered with data science on homepage and PLP personalization — segmentation logic, decision trees, and a holdout designed so the lift was clearly attributable before calling it done.' },
+    { label: 'story-point calibration', detail: 'Moved a team off ad-hoc estimation to consistent story-point calibration and burn-up tracking over two quarters.' },
+    { label: 'engineering background', detail: 'Three years as a software engineer in enterprise e-commerce — owned 7 storefront modules end to end, including the sync that kept inventory and order state consistent across channels.' },
+    { label: 'noc + soc', detail: 'Contributes to a converged NOC + SOC model — SD-WAN, MDR/EDR, IAM and Zero Trust discussions. Most of the value is triage: performance issue, config drift, or an actual security event.' },
+    { label: 'decision records', detail: 'PRDs, technical decision records and API specs written so the next person doesn’t have to ask.' },
+    { label: 'launch management', detail: 'Phased rollout, kill switches, rollback criteria — decided before go, not during.' },
+    { label: 'hypercare + retro', detail: 'Tightened on-call and live dashboards through hypercare, closed out with a blameless retro before the next release starts.' },
+    { label: 'gtm content', detail: 'Writes release notes, in-app copy and launch narrative herself when marketing needs a head start.' },
+    { label: 'three audiences', detail: 'Same decision, three translations — trade-offs for engineering, risk and timeline for leadership, plain outcomes for support and sales.' },
+    { label: 'analytics stack', detail: 'GA4, Amplitude, Metabase, Power BI, SQL — funnel, cohort and HEART, not just dashboards.' },
+    { label: 'say no', detail: 'A research loop that shaped what shipped next — and, just as often, what got cut from the roadmap before it cost a sprint.' },
+    { label: 'kano + wizard-of-oz', detail: 'Runs Kano and Wizard-of-Oz tests before a build gets scoped — cheaper to fake a feature for a week than build the wrong one for a quarter.' },
+    { label: 'manages the room', detail: 'Managed engineers, QA and design directly across two squads — not just the backlog they worked from.' },
+    { label: 'early stack', detail: 'A CNN image classifier on GCP behind a Flask/SQL inference pipeline, a scraping pipeline into GCP buckets, subnetting on Cisco Packet Tracer — the range under the platform instincts now.' },
+    { label: 'own the ask, not just the build', detail: 'Feasibility, scope trade-offs, defect triage and release readiness owned from the requester’s side too — not just what engineering ships.' },
+    { label: 'north star metric', detail: 'Every quarter ties back to one north star metric, with guardrails that block a launch if it moves the number for the wrong reason.' },
+    { label: 'okrs over feature counts', detail: 'Runs quarters on OKRs, not shipped-feature counts — a released feature and a moved metric are not the same claim.' },
+    { label: 'pr/faq first', detail: 'Writes the launch narrative and the FAQ before scoping starts — if the story doesn’t work backwards from the user, the feature doesn’t get built.' },
+    { label: 'pre-mortem', detail: 'Runs a pre-mortem before a big bet ships — assumes it failed, works backward to why, fixes what’s fixable before launch, not after.' },
+    { label: 'quality bar', detail: 'Holds a feature at the door if it doesn’t clear the bar — a late launch beats a wrong one.' },
+    { label: 'guardrail metrics', detail: 'A primary metric alone isn’t enough — guardrails on latency, error rate and support volume stop a good number from hiding a bad launch.' },
+    { label: 'a/a before a/b', detail: 'Runs an A/A test before trusting an A/B result — noise reads as a lift more often than most teams admit.' },
+    { label: 'education', detail: 'MBA, M.Sc. and B.Sc. — tap to expand, tap again to close.', children: [
+      { label: 'mba — iit', detail: 'MBA, International Business & Finance, IIT — pursuing, 2022–2027. Focus: generative AI and business strategy.' },
+      { label: 'm.sc. — indus university', detail: 'M.Sc., Computer Application & IT, Indus University — CGPA 9.75. Built the IoT GPS tracker adopted by 3 schools at 95% location accuracy.' },
+      { label: 'b.sc. — indus university', detail: 'B.Sc., Computer Application & IT, Indus University — CGPA 8.5. Built an e-commerce/delivery management system and an LMS for 300+ users.' }
+    ] }
   ];
   var classes = ['chip-1', 'chip-2', 'chip-3', 'chip-4', 'chip-5', 'chip-6'];
 
@@ -203,23 +229,38 @@
     return { x: Math.random() * maxX, y: Math.random() * maxY };
   }
 
-  fragments.forEach(function (frag, i) {
+  var colorSeq = 0;
+
+  // builds one chip (DOM element + physics state), optionally seeded near a
+  // parent's position — used both for the initial fragment set and for
+  // children spawned later by an expandable fragment
+  function makeChip(frag, near) {
     var el = document.createElement('div');
-    el.className = 'frag ' + classes[i % classes.length];
-    el.textContent = frag.label;
+    el.className = 'frag ' + classes[colorSeq++ % classes.length];
+    el.textContent = frag.children ? frag.label + ' +' : frag.label;
     el.tabIndex = 0;
     el.setAttribute('role', 'button');
-    el.setAttribute('aria-label', 'Expand: ' + frag.label);
+    el.setAttribute('aria-label', (frag.children ? 'Expand: ' : 'Read: ') + frag.label);
     stage.appendChild(el);
 
     var w = el.offsetWidth, h = el.offsetHeight;
-    var spot = findOpenSpot(w, h);
+    var spot;
+    if (near) {
+      var maxX = Math.max(W - w, 8), maxY = Math.max(H - h, 8);
+      spot = {
+        x: Math.min(Math.max(near.x + (Math.random() - 0.5) * 90, 0), maxX),
+        y: Math.min(Math.max(near.y + (Math.random() - 0.5) * 90, 0), maxY)
+      };
+    } else {
+      spot = findOpenSpot(w, h);
+    }
     var angle = Math.random() * Math.PI * 2;
     // slightly slower drift on narrow/mobile screens — less frantic in a tighter space
     var mobileSpeedMul = W < 560 ? 0.8 : 1;
-    var speed = (0.1 + Math.random() * 0.12) * mobileSpeedMul;
-    chips.push({
-      el: el, x: spot.x, y: spot.y, w: w, h: h, detail: frag.detail,
+    var speed = (0.045 + Math.random() * 0.06) * mobileSpeedMul;
+    var chip = {
+      el: el, x: spot.x, y: spot.y, w: w, h: h, label: frag.label, detail: frag.detail,
+      children: frag.children, expanded: false, spawnedChildren: [],
       // constant slow drift, like debris floating in space — this never decays to zero
       baseVx: Math.cos(angle) * speed,
       baseVy: Math.sin(angle) * speed,
@@ -234,32 +275,77 @@
       // temporary nudge from cursor proximity/drag throw, decays back to nothing
       jitterVx: 0, jitterVy: 0,
       headingTimer: 90 + Math.floor(Math.random() * 150)
-    });
-  });
+    };
+    chips.push(chip);
+    bindEvents(chip);
+    return chip;
+  }
+
+  // removes one spawned child chip from the stage and the live physics list —
+  // the inverse of makeChip, used to collapse an expanded fragment back down
+  function removeChip(c) {
+    if (c.el.parentNode) c.el.parentNode.removeChild(c.el);
+    var idx = chips.indexOf(c);
+    if (idx !== -1) chips.splice(idx, 1);
+  }
 
   function activate(chip) {
     chips.forEach(function (c) { c.el.classList.remove('is-active'); });
     chip.el.classList.add('is-active');
     if (consoleText) consoleText.textContent = chip.detail;
+    if (chip.children) {
+      if (!chip.expanded) {
+        chip.expanded = true;
+        chip.el.textContent = chip.label + ' −';
+        chip.spawnedChildren = chip.children.map(function (childFrag) {
+          return makeChip(childFrag, { x: chip.x, y: chip.y });
+        });
+      } else {
+        chip.expanded = false;
+        chip.el.textContent = chip.label + ' +';
+        chip.spawnedChildren.forEach(removeChip);
+        chip.spawnedChildren = [];
+      }
+    }
   }
 
-  chips.forEach(function (c) {
+  // wires up the interactions for one chip — same function whether it's part
+  // of the initial set or spawned later, and whether motion is reduced
+  function bindEvents(c) {
     c.el.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(c); }
     });
-  });
-
-  if (reduceMotion) {
-    chips.forEach(function (c) {
+    if (reduceMotion) {
       c.el.style.transform = 'translate(' + c.x + 'px,' + c.y + 'px)';
       c.el.addEventListener('click', function () { activate(c); });
+      return;
+    }
+    c.el.addEventListener('mousedown', function (e) {
+      dragTarget = c; moved = false; downPos = localPos(e); lastDragMove = Date.now();
+      dragOffset = { x: downPos.x - c.x, y: downPos.y - c.y };
+      c.jitterVx = 0; c.jitterVy = 0; e.preventDefault();
     });
-    return;
+    c.el.addEventListener('mouseup', function () {
+      if (!moved) activate(c);
+    });
+    c.el.addEventListener('touchstart', function (e) {
+      dragTarget = c; moved = false; downPos = localPos(e); lastDragMove = Date.now();
+      dragOffset = { x: downPos.x - c.x, y: downPos.y - c.y };
+      c.jitterVx = 0; c.jitterVy = 0;
+    }, { passive: true });
+    c.el.addEventListener('touchend', function () {
+      if (!moved) activate(c);
+    });
   }
 
   var mouse = { x: -9999, y: -9999 };
   var dragTarget = null;
   var downPos = null;
+  // where inside the chip the pointer grabbed it, so dragging repositions the
+  // chip relative to the grab point instead of snapping its top-left corner
+  // to the raw cursor coordinate — without this, even a sub-pixel move on a
+  // click (trackpads do this constantly) reads as the chip lurching sideways
+  var dragOffset = { x: 0, y: 0 };
   var moved = false;
   var lastDragMove = 0;
 
@@ -270,13 +356,17 @@
     return { x: cx - r.left, y: cy - r.top };
   }
 
+  fragments.forEach(function (frag) { makeChip(frag, null); });
+
+  if (reduceMotion) return;
+
   stage.addEventListener('mousemove', function (e) {
     var p = localPos(e);
     mouse.x = p.x; mouse.y = p.y;
     if (dragTarget) {
-      dragTarget.x = p.x; dragTarget.y = p.y;
+      dragTarget.x = p.x - dragOffset.x; dragTarget.y = p.y - dragOffset.y;
       lastDragMove = Date.now();
-      if (downPos && (Math.abs(p.x - downPos.x) > 4 || Math.abs(p.y - downPos.y) > 4)) moved = true;
+      if (downPos && (Math.abs(p.x - downPos.x) > 8 || Math.abs(p.y - downPos.y) > 8)) moved = true;
     }
   });
   stage.addEventListener('mouseleave', function () { mouse.x = -9999; mouse.y = -9999; });
@@ -290,23 +380,6 @@
     downPos = null;
     mouse.x = -9999; mouse.y = -9999;
   }
-
-  chips.forEach(function (c) {
-    c.el.addEventListener('mousedown', function (e) {
-      dragTarget = c; moved = false; downPos = localPos(e); lastDragMove = Date.now();
-      c.jitterVx = 0; c.jitterVy = 0; e.preventDefault();
-    });
-    c.el.addEventListener('mouseup', function () {
-      if (!moved) activate(c);
-    });
-    c.el.addEventListener('touchstart', function (e) {
-      dragTarget = c; moved = false; downPos = localPos(e); lastDragMove = Date.now();
-      c.jitterVx = 0; c.jitterVy = 0;
-    }, { passive: true });
-    c.el.addEventListener('touchend', function () {
-      if (!moved) activate(c);
-    });
-  });
 
   window.addEventListener('mouseup', endDrag);
   window.addEventListener('touchend', endDrag);
@@ -324,9 +397,9 @@
   window.addEventListener('touchmove', function (e) {
     if (dragTarget) {
       var p = localPos(e);
-      dragTarget.x = p.x; dragTarget.y = p.y;
+      dragTarget.x = p.x - dragOffset.x; dragTarget.y = p.y - dragOffset.y;
       lastDragMove = Date.now();
-      if (downPos && (Math.abs(p.x - downPos.x) > 4 || Math.abs(p.y - downPos.y) > 4)) moved = true;
+      if (downPos && (Math.abs(p.x - downPos.x) > 8 || Math.abs(p.y - downPos.y) > 8)) moved = true;
     }
   }, { passive: true });
 
@@ -338,7 +411,7 @@
   // treat each fragment as a bounding circle for collision purposes —
   // deliberately smaller than the true half-diagonal so glancing passes don't
   // count as contact
-  function radiusOf(c) { return (c.w + c.h) / 4.6; }
+  function radiusOf(c) { return (c.w + c.h) / 6; }
 
   // atom-style elastic bounce between every pair of fragments, run once per
   // frame after positions are integrated. Works identically whether the
@@ -380,7 +453,7 @@
         // a floor on post-collision speed — in a crowded/mobile layout many
         // pairs can be "colliding" every single frame, and without this the
         // repeated elastic exchange cancels itself into a near-total freeze
-        var MIN_SPEED = 0.1;
+        var MIN_SPEED = 0.045;
 
         if (!aDrag) {
           avx -= rel * nx; avy -= rel * ny;
@@ -425,13 +498,13 @@
       // on touch, mouse.x/y sit off-stage so this is a no-op and drift alone carries it
       var dx = c.x - mouse.x, dy = c.y - mouse.y;
       var dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 110 && dist > 0.1) {
-        var force = ((110 - dist) / 110) * 0.9;
+      if (dist < 55 && dist > 0.1) {
+        var force = ((55 - dist) / 55) * 0.35;
         c.jitterVx += (dx / dist) * force;
         c.jitterVy += (dy / dist) * force;
       }
-      c.jitterVx *= 0.94;
-      c.jitterVy *= 0.94;
+      c.jitterVx *= 0.9;
+      c.jitterVy *= 0.9;
 
       // every couple of seconds, nudge the heading by a modest turn (not a full
       // random reversal) so the path curves naturally instead of snapping around
